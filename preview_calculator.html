@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#FF9800">
+    <link rel="manifest" href="manifest_preview.json">
+    <title>💰 Попередній розрахунок</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF9800;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --warning: #FFC107;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, #F57C00 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .total-box {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .total-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 1.2rem;
+        }
+
+        .hint {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .autocomplete {
+            position: relative;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 2px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .autocomplete-items div {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .autocomplete-items div:hover {
+            background-color: #f0f0f0;
+        }
+
+        .autocomplete-active {
+            background-color: var(--primary) !important;
+            color: white;
+        }
+
+        .city-match {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .route-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .route-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .route-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        @media (max-width: 600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Попередній розрахунок</h1>
+            <p>Оцінка ефективності замовлення</p>
+            <div style="margin-top: 10px; padding: 10px; background: #fff3e0; border-radius: 8px; font-size: 0.85rem; color: #e65100;">
+                ⚠️ Використовується для оцінки замовлення <strong>ПЕРЕД</strong> його прийняттям
+            </div>
+            <div style="margin-top: 10px;">
+                <a href="waybill_calculator.html" style="display: inline-block; padding: 10px 20px; background: #0057B7; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                    📋 Перейти до путивного листа
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👤 Водій</h2>
+            <div class="form-group">
+                <label for="driver">Виберіть водія</label>
+                <select id="driver">
+                    <option value="">-- Виберіть водія --</option>
+                    <option value="Стародуб Сергій Олександрович">Стародуб Сергій Олександрович</option>
+                    <option value="Наривончик Олександр Васильович">Наривончик Олександр Васильович</option>
+                    <option value="Димоглов Иван Петрович">Димоглов Иван Петрович</option>
+                    <option value="Турків Степан Дмитрович">Турків Степан Дмитрович</option>
+                    <option value="Демченко Олексей Борисович">Демченко Олексей Борисович</option>
+                    <option value="Кузнецов Сергій Володимирович">Кузнецов Сергій Володимирович</option>
+                    <option value="Фесечко Олександр Миколайович">Фесечко Олександр Миколайович</option>
+                    <option value="Ковальчук Олег Петрович">Ковальчук Олег Петрович</option>
+                    <option value="Варенчук Сергій Анатолійович">Варенчук Сергій Анатолійович</option>
+                    <option value="Фаїн Андрій Альбертович">Фаїн Андрій Альбертович</option>
+                    <option value="Єждін Олександр">Єждін Олександр</option>
+                    <option value="Кирилов Ростислав Михайлович">Кирилов Ростислав Михайлович</option>
+                </select>
+                <small class="hint">💡 Необов'язково, для довідки</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📍 Маршрут</h2>
+            
+            <div class="form-group">
+                <label for="fromCity">🚩 Звідки (місто)</label>
+                <div class="autocomplete">
+                    <input type="text" id="fromCity" placeholder="Київ" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="toCity">🏁 Куди (місто)</label>
+                <div class="autocomplete">
+                    <input type="text" id="toCity" placeholder="Львів" autocomplete="off">
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculateRoute()" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); margin-bottom: 15px;">
+                🔍 Розрахувати відстань автоматично
+            </button>
+
+            <div id="routeInfo" style="display: none; background: #e3f2fd; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <div style="font-weight: 600; color: #1976D2; margin-bottom: 8px;">✅ Маршрут знайдено:</div>
+                <div id="routeData"></div>
+            </div>
+
+            <!-- Popular routes table -->
+            <details style="margin-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600; color: var(--primary); padding: 10px; background: #fff3e0; border-radius: 8px;">
+                    📋 Довідник маршрутів (клацніть для вибору)
+                </summary>
+                <table class="route-table" id="routesTable">
+                    <tbody>
+                        <!-- Routes will be populated by JavaScript -->
+                    </tbody>
+                </table>
+                <div style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                    <div style="font-weight: 600; margin-bottom: 10px;">➕ Додати маршрут у довідник</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 0.7fr auto; gap: 8px;">
+                        <input type="text" id="newFrom" placeholder="Звідки" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                        <input type="text" id="newTo" placeholder="Куди" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                        <input type="number" id="newDist" placeholder="км" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                        <button onclick="addRoute()" style="padding: 8px 15px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">➕</button>
+                    </div>
+                </div>
+            </details>
+
+            <div class="form-group">
+                <label for="distance">Відстань маршруту</label>
+                <div class="input-group">
+                    <input type="number" id="distance" value="540" min="0">
+                    <span class="input-suffix">км</span>
+                </div>
+                <small class="hint">💡 Автоматично або введіть вручну</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💰 Вартість і витрати</h2>
+            
+            <div class="form-group">
+                <label for="orderCost">Вартість замовлення (від клієнта)</label>
+                <div class="input-group">
+                    <input type="number" id="orderCost" value="30000" min="0">
+                    <span class="input-suffix">грн</span>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="salary">Зарплата водія</label>
+                    <div class="input-group">
+                        <input type="number" id="salary" value="4500" readonly style="background: #f0f0f0;">
+                        <span class="input-suffix">грн</span>
+                    </div>
+                    <small class="hint">💡 Автоматично: 15% від замовлення</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="perDiem">Добові</label>
+                    <div class="input-group">
+                        <input type="number" id="perDiem" value="600">
+                        <span class="input-suffix">грн/день</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="days">Днів у рейсі</label>
+                    <div class="input-group">
+                        <input type="number" id="days" value="2" min="1">
+                        <span class="input-suffix">днів</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fuelConsumption">Витрата палива</label>
+                    <div class="input-group">
+                        <input type="number" id="fuelConsumption" value="25" step="0.1">
+                        <span class="input-suffix">л/100км</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="fuelPrice">Ціна палива</label>
+                <div class="input-group">
+                    <input type="number" id="fuelPrice" value="55">
+                    <span class="input-suffix">грн/л</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="otherCosts">Інші витрати</label>
+                <div class="input-group">
+                    <input type="number" id="otherCosts" value="0">
+                    <span class="input-suffix">грн</span>
+                </div>
+                <small class="hint">💡 Дорожні збори, паркування, тощо</small>
+            </div>
+        </div>
+
+        <button class="btn" onclick="calculate()">Розрахувати ефективність</button>
+
+        <div id="results" style="display: none;">
+            <div class="card">
+                <h2>📊 Результати розрахунку</h2>
+                
+                <div class="result-item">
+                    <span class="result-label">Відстань:</span>
+                    <span class="result-value" id="resDistance">0 км</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Паливо:</span>
+                    <span class="result-value" id="resFuel">0 л</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Вартість палива:</span>
+                    <span class="result-value" id="resFuelCost">0 грн</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Зарплата:</span>
+                    <span class="result-value" id="resSalary">0 грн</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Добові:</span>
+                    <span class="result-value" id="resPerDiem">0 грн</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Інші витрати:</span>
+                    <span class="result-value" id="resOther">0 грн</span>
+                </div>
+            </div>
+
+            <div class="result-box" id="profitBox">
+                <div class="total-box">
+                    <div class="total-item">
+                        <span>Дохід:</span>
+                        <span id="resIncome">0 грн</span>
+                    </div>
+                    <div class="total-item">
+                        <span>Витрати:</span>
+                        <span id="resCosts">0 грн</span>
+                    </div>
+                    <div class="total-item" style="border-top: 2px solid rgba(255,255,255,0.3); padding-top: 15px; margin-top: 10px; font-size: 1.4rem;">
+                        <span>ПРИБУТОК:</span>
+                        <span id="resProfit">0 грн</span>
+                    </div>
+                    <div class="total-item" style="font-size: 1.2rem;">
+                        <span>Рентабельність:</span>
+                        <span id="resMargin">0%</span>
+                    </div>
+                </div>
+
+                <div id="recommendation" style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.1rem; font-weight: 600; text-align: center;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Routes database
+        let routes = [
+            ["Київ", "Вінниця", 267], ["Київ", "Дніпро", 480], ["Київ", "Житомир", 140],
+            ["Київ", "Запоріжжя", 520], ["Київ", "Івано-Франківськ", 590], ["Київ", "Кропивницький", 310],
+            ["Київ", "Луцьк", 410], ["Київ", "Львів", 540], ["Київ", "Миколаїв", 490],
+            ["Київ", "Одеса", 475], ["Київ", "Полтава", 340], ["Київ", "Рівне", 315],
+            ["Київ", "Суми", 350], ["Київ", "Тернопіль", 440], ["Київ", "Харків", 480],
+            ["Київ", "Херсон", 600], ["Київ", "Хмельницький", 380], ["Київ", "Черкаси", 195],
+            ["Київ", "Чернівці", 470], ["Київ", "Чернігів", 145],
+            ["Львів", "Одеса", 790], ["Львів", "Харків", 1020], ["Львів", "Дніпро", 820],
+            ["Одеса", "Харків", 730], ["Одеса", "Дніпро", 450],
+            ["Харків", "Дніпро", 215], ["Харків", "Запоріжжя", 280], ["Дніпро", "Запоріжжя", 85]
+        ];
+
+        // Load custom routes from localStorage
+        const savedRoutes = localStorage.getItem('customRoutes');
+        if (savedRoutes) {
+            try {
+                const custom = JSON.parse(savedRoutes);
+                routes = [...routes, ...custom];
+            } catch (e) {
+                console.error('Error loading routes:', e);
+            }
+        }
+
+        // Populate routes table
+        function populateRoutes() {
+            const tbody = document.getElementById('routesTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            routes.forEach(([from, to, dist]) => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => selectRoute(from, to, dist);
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${from} → ${to}</td>
+                    <td style="text-align: right; color: var(--primary); font-weight: 700;">${dist} км</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        populateRoutes();
+
+        // Select route
+        function selectRoute(from, to, dist) {
+            document.getElementById('fromCity').value = from;
+            document.getElementById('toCity').value = to;
+            document.getElementById('distance').value = dist;
+            
+            document.getElementById('routeInfo').style.display = 'block';
+            document.getElementById('routeData').innerHTML = `
+                <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                    <span>Маршрут:</span>
+                    <strong>${from} → ${to}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                    <span>Відстань:</span>
+                    <strong>${dist} км</strong>
+                </div>
+            `;
+        }
+
+        // Add new route
+        function addRoute() {
+            const from = document.getElementById('newFrom').value.trim();
+            const to = document.getElementById('newTo').value.trim();
+            const dist = parseInt(document.getElementById('newDist').value);
+
+            if (!from || !to || !dist) {
+                alert('Заповніть всі поля!');
+                return;
+            }
+
+            routes.push([from, to, dist]);
+            
+            // Save to localStorage
+            const customRoutes = routes.slice(28); // Save only custom routes
+            localStorage.setItem('customRoutes', JSON.stringify(customRoutes));
+            
+            populateRoutes();
+            
+            document.getElementById('newFrom').value = '';
+            document.getElementById('newTo').value = '';
+            document.getElementById('newDist').value = '';
+            
+            alert(`✅ Маршрут "${from} → ${to}" додано!`);
+        }
+
+        // Calculate route distance using OSRM
+        async function calculateRoute() {
+            const from = document.getElementById('fromCity').value.trim();
+            const to = document.getElementById('toCity').value.trim();
+
+            if (!from || !to) {
+                alert('Введіть міста відправлення та призначення!');
+                return;
+            }
+
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Розрахунок...';
+            btn.disabled = true;
+
+            try {
+                // Step 1: Geocode cities (get coordinates)
+                console.log('Geocoding:', from, '→', to);
+                
+                const fromCoords = await geocodeCity(from);
+                const toCoords = await geocodeCity(to);
+                
+                console.log('Coordinates:', fromCoords, '→', toCoords);
+
+                // Step 2: Calculate route using OSRM
+                const routeUrl = `https://router.project-osrm.org/route/v1/driving/${fromCoords.lon},${fromCoords.lat};${toCoords.lon},${toCoords.lat}?overview=false`;
+                
+                const routeResponse = await fetch(routeUrl);
+                const routeData = await routeResponse.json();
+
+                if (routeData.code !== 'Ok' || !routeData.routes || !routeData.routes[0]) {
+                    throw new Error('Маршрут не знайдено');
+                }
+
+                const route = routeData.routes[0];
+                const distance = Math.round(route.distance / 1000); // meters to km
+                const duration = Math.round(route.duration / 3600); // seconds to hours
+
+                // Update fields
+                document.getElementById('distance').value = distance;
+
+                // Show result
+                document.getElementById('routeInfo').style.display = 'block';
+                document.getElementById('routeData').innerHTML = `
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <span>Маршрут:</span>
+                        <strong>${from} → ${to}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <span>Відстань:</span>
+                        <strong style="color: var(--primary);">${distance} км</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <span>Орієнтовний час:</span>
+                        <strong>${duration} год</strong>
+                    </div>
+                    <div style="margin-top: 10px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 6px; font-size: 0.85rem; color: #2e7d32;">
+                        ✅ Маршрут розраховано автоматично через OSRM
+                    </div>
+                `;
+
+                console.log('Route calculated:', distance, 'km,', duration, 'hours');
+
+            } catch (error) {
+                console.error('Route calculation error:', error);
+                
+                let errorMessage = '❌ Помилка розрахунку маршруту.\n\n';
+                
+                if (error.message.includes('не знайдено')) {
+                    errorMessage += 'Перевірте назви міст або використайте довідник маршрутів.';
+                } else if (error.message.includes('fetch')) {
+                    errorMessage += 'Проблема з підключенням до сервісу.\nСпробуйте пізніше або використайте довідник.';
+                } else {
+                    errorMessage += 'Використайте довідник маршрутів або введіть відстань вручну.';
+                }
+                
+                alert(errorMessage);
+
+                document.getElementById('routeInfo').style.display = 'block';
+                document.getElementById('routeData').innerHTML = `
+                    <div style="padding: 10px; background: rgba(244, 67, 54, 0.1); border-radius: 6px; color: #c62828;">
+                        ⚠️ Не вдалося розрахувати маршрут автоматично.<br>
+                        Виберіть з довідника або введіть відстань вручну.
+                    </div>
+                `;
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Geocode city to coordinates
+        async function geocodeCity(cityName) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}&countrycodes=ua,md,ro,bg,tr&limit=1&addressdetails=1`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Accept-Language': 'uk,ru,en,ro,bg,tr'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Помилка геокодування');
+            }
+
+            const data = await response.json();
+
+            if (!data || data.length === 0) {
+                throw new Error(`Місто "${cityName}" не знайдено`);
+            }
+
+            return {
+                lat: parseFloat(data[0].lat),
+                lon: parseFloat(data[0].lon),
+                displayName: data[0].display_name
+            };
+        }
+
+        // Auto-calculate salary (15%)
+        document.getElementById('orderCost').addEventListener('input', function() {
+            const orderCost = parseFloat(this.value) || 0;
+            document.getElementById('salary').value = Math.round(orderCost * 0.15);
+        });
+
+        // Calculate
+        function calculate() {
+            const distance = parseFloat(document.getElementById('distance').value) || 0;
+            const orderCost = parseFloat(document.getElementById('orderCost').value) || 0;
+            const salary = parseFloat(document.getElementById('salary').value) || 0;
+            const perDiem = parseFloat(document.getElementById('perDiem').value) || 0;
+            const days = parseFloat(document.getElementById('days').value) || 0;
+            const fuelConsumption = parseFloat(document.getElementById('fuelConsumption').value) || 0;
+            const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
+            const otherCosts = parseFloat(document.getElementById('otherCosts').value) || 0;
+
+            if (distance === 0) {
+                alert('Введіть відстань маршруту!');
+                return;
+            }
+
+            // Calculate
+            const fuel = (distance * fuelConsumption) / 100;
+            const fuelCost = fuel * fuelPrice;
+            const perDiemTotal = days * perDiem;
+            const totalCosts = fuelCost + salary + perDiemTotal + otherCosts;
+            const profit = orderCost - totalCosts;
+            const margin = orderCost > 0 ? (profit / orderCost * 100) : 0;
+
+            // Display results
+            document.getElementById('resDistance').textContent = distance + ' км';
+            document.getElementById('resFuel').textContent = fuel.toFixed(1) + ' л';
+            document.getElementById('resFuelCost').textContent = fuelCost.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resSalary').textContent = salary.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resPerDiem').textContent = perDiemTotal.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resOther').textContent = otherCosts.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resIncome').textContent = orderCost.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resCosts').textContent = totalCosts.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resProfit').textContent = profit.toLocaleString('uk-UA') + ' грн';
+            document.getElementById('resMargin').textContent = margin.toFixed(1) + '%';
+
+            // Recommendation
+            const profitBox = document.getElementById('profitBox');
+            const recommendation = document.getElementById('recommendation');
+            
+            if (profit < 0) {
+                profitBox.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                recommendation.textContent = '❌ НЕ ПРИЙМАТИ! Замовлення збиткове!';
+            } else if (margin < 20) {
+                profitBox.style.background = 'linear-gradient(135deg, #FFC107 0%, #FFA000 100%)';
+                recommendation.textContent = '⚠️ Низька рентабельність. Розгляньте уважно.';
+            } else if (margin < 40) {
+                profitBox.style.background = 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)';
+                recommendation.textContent = '✅ Прийнятна рентабельність. Можна приймати.';
+            } else {
+                profitBox.style.background = 'linear-gradient(135deg, #00C853 0%, #00A043 100%)';
+                recommendation.textContent = '🎉 ВІДМІННО! Високо рентабельне замовлення!';
+            }
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
